@@ -56,8 +56,8 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         REPOSITORY: ${{ env.ECR_REPOSITORY_NAME }}
       run: |
-        docker-compose build
-        docker-compose push
+        docker compose build
+        docker compose push
 
       continue-on-error: false
 
