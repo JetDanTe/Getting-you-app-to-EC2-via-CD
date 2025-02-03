@@ -4,7 +4,7 @@ services:
   frontend:
     build:
       context: ./src/client/
-      dockerfile: front_dockerfile
+      dockerfile: Dockerfile
     ports:
       - "3000:80"
     environment:
@@ -15,7 +15,7 @@ services:
   backend:
     build:
       context: ./src/go-server/
-      dockerfile: dockerfile     
+      dockerfile: Dockerfile     
     ports:
       - "8080:8080"
     environment:
