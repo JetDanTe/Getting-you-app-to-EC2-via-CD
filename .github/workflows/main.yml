@@ -58,11 +58,14 @@ jobs:
         IMAGE_TAG: ${{ env.IMAGE_TAG }}
       run: |
         cd ./src/client
-        docker build -t go-to-do_front:$IMAGE_TAG -f Dockerfile .
+        docker build -t ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-front:${{ env.IMAGE_TAG }} -f Dockerfile .
+        docker push ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-front:${{ env.IMAGE_TAG }}
+        
         cd ../go-server
-        docker build -t go-to-do_back:$IMAGE_TAG -f Dockerfile .
+        docker build -t ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-back:${{ env.IMAGE_TAG }} -f Dockerfile .
+        docker push ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-back:${{ env.IMAGE_TAG }}
+        
         docker images
-        docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_NAME }}:${{ env.IMAGE_TAG }}
 
 
       continue-on-error: false
