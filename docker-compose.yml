@@ -30,7 +30,6 @@ services:
       - mongo_data:/data/db
     command: --bind_ip_all
 
-
 volumes:
   mongo_data:
 
