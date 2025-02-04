@@ -58,7 +58,8 @@ jobs:
         IMAGE_TAG: ${{ env.IMAGE_TAG }}
       run: |
         docker compose build
-        docker compose push
+        docker tag go-to-do-app:latest $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG 
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       continue-on-error: false
 
