@@ -57,8 +57,10 @@ jobs:
         ECR_REPOSITORY: go-to-do-app
         IMAGE_TAG: ${{ env.IMAGE_TAG }}
       run: |
-        docker build -t go-to-do_front:$IMAGE_TAG -f ./src/client/Dockerfile .
-        docker build -t go-to-do_back:$IMAGE_TAG -f ./src/go-server/Dockerfile .
+        cd ./src/client
+        docker build -t go-to-do_front:$IMAGE_TAG -f Dockerfile .
+        cd ../go-server
+        docker build -t go-to-do_back:$IMAGE_TAG -f Dockerfile .
         docker images
         docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_NAME }}:${{ env.IMAGE_TAG }}
 
