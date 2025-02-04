@@ -57,12 +57,35 @@ jobs:
         ECR_REPOSITORY: go-to-do-app
         IMAGE_TAG: ${{ env.IMAGE_TAG }}
       run: |
-        docker compose build
+        docker build -t go-to-do_front:$IMAGE_TAG -f ./src/client/Dockerfile .
+        docker build -t go-to-do_back:$IMAGE_TAG -f ./src/go-server/Dockerfile .
         docker images
+        docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_NAME }}:${{ env.IMAGE_TAG }}
+
 
       continue-on-error: false
 
     - name: Print image URI
       run: |
         echo "Image URI: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_NAME }}:${{ env.IMAGE_TAG }}"
+
+    - name: Copy files to EC2
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        source: "docker-compose.yml,.env"
+        target: "/app"
+
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd /app
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+          docker compose up -d
 
