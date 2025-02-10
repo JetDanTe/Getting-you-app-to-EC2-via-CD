@@ -10,6 +10,7 @@ permissions:
   contents: read
   actions: read
 
+  
 jobs:
   deploy:
     runs-on: ubuntu-latest
