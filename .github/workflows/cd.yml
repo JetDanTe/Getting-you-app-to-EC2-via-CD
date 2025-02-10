@@ -1,12 +1,12 @@
-name: CD Pipeline
+name: pip2
 
 on:
   workflow_run:
-    workflows: ["CI Pipeline"]
+    workflows: ["pip1"]
     types: [completed]
-    branches: [hw]  # explicitly specify branch
+    branches: [hw] 
 
-permissions:  # add explicit permissions
+permissions:
   contents: read
   actions: read
   checks: read
