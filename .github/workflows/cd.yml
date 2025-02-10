@@ -6,16 +6,23 @@ on:
       - "CI Pipeline"
     types:
       - completed
-    branches:
-      - hw
-
-permissions:
-  contents: read
-  actions: read
-
 
 jobs:
+  debug-trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug Event
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+          EVENT_CONTEXT: ${{ toJSON(github.event) }}
+          WORKFLOW_CONTEXT: ${{ toJSON(github.event.workflow_run) }}
+        run: |
+          echo "GitHub Context: $GITHUB_CONTEXT"
+          echo "Event Context: $EVENT_CONTEXT"
+          echo "Workflow Context: $WORKFLOW_CONTEXT"
+
   deploy:
+    needs: debug-trigger
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'hw' }}
     
