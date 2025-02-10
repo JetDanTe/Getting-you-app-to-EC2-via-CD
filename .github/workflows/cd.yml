@@ -1,16 +1,19 @@
 name: CD Pipeline
 
 on:
-  workflow_run:
-    workflows: ["CI Pipeline"]
-    types:
-      - completed
+  push:
+    branches: [ hw ]
+# on:
+#   workflow_run:
+#     workflows: ["CI Pipeline"]
+#     types:
+#       - completed
 
 permissions:
   contents: read
   actions: read
 
-  
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
