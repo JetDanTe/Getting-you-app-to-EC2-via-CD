@@ -2,39 +2,11 @@ name: CD Pipeline
 
 on:
   workflow_run:
-    workflows: 
-      - "CI Pipeline"
-    types:
-      - completed
+    workflows: ["CI Pipeline"]
+    types: [completed]
 
 jobs:
-  debug-trigger:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Debug Event
-        env:
-          GITHUB_CONTEXT: ${{ toJSON(github) }}
-          EVENT_CONTEXT: ${{ toJSON(github.event) }}
-          WORKFLOW_CONTEXT: ${{ toJSON(github.event.workflow_run) }}
-        run: |
-          echo "GitHub Context: $GITHUB_CONTEXT"
-          echo "Event Context: $EVENT_CONTEXT"
-          echo "Workflow Context: $WORKFLOW_CONTEXT"
-
-  deploy:
-    needs: debug-trigger
-    runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'hw' }}
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy to EC2
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "docker-compose.yml"
-          target: "/app"
+      - run: echo "Workflow triggered"
