@@ -8,6 +8,8 @@ services:
     depends_on:
       - backend
 
+
+
   backend:
     image: 183295453321.dkr.ecr.us-east-1.amazonaws.com/go-to-do-app-back:latest
     ports:
