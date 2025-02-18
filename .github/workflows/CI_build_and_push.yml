@@ -39,33 +39,44 @@ jobs:
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
             echo "TAG=$VERSION" >> $GITHUB_ENV
+            echo "LATEST_TAG=latest" >> $GITHUB_ENV
           elif [[ $GITHUB_REF == refs/heads/master ]]; then
             echo "TAG=master" >> $GITHUB_ENV
+            echo "LATEST_TAG=latest" >> $GITHUB_ENV
           elif [[ $GITHUB_REF == refs/heads/dev ]]; then
             echo "TAG=dev" >> $GITHUB_ENV
+            echo "LATEST_TAG=latest-dev" >> $GITHUB_ENV
           else
-            echo "TAG=${{ github.sha }}" >> $GITHUB_ENV
+            SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+            echo "TAG=$SHORT_SHA" >> $GITHUB_ENV
+            echo "LATEST_TAG=latest-pr" >> $GITHUB_ENV
           fi
-
+      
           echo "ECR_URL=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_NAME }}" > .env
           echo "IMAGE_TAG=$TAG" >> .env
+          echo "LATEST_IMAGE_TAG=$LATEST_TAG" >> .env
 
       - name: Build, tag, and push image to Amazon ECR
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: go-to-do-app
-          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            ECR_REPOSITORY: go-to-do-app
+            IMAGE_TAG: ${{ env.IMAGE_TAG }}
+            LATEST_TAG: ${{ env.LATEST_TAG }}
         run: |
-          cd ./src/client
-          docker build -t ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-front:${{ env.IMAGE_TAG }} -f Dockerfile .
-          docker push ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-front:${{ env.IMAGE_TAG }}
-
-          cd ../go-server
-          docker build -t ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-back:${{ env.IMAGE_TAG }} -f Dockerfile .
-          docker push ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-back:${{ env.IMAGE_TAG }}
-
-          docker images
-
+            cd ./src/client
+            docker build -t ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-front:${{ env.IMAGE_TAG }} -f Dockerfile .
+            docker tag ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-front:${{ env.IMAGE_TAG }} ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-front:${LATEST_TAG}
+            docker push ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-front:${{ env.IMAGE_TAG }}
+            docker push ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-front:${LATEST_TAG}
+            
+            cd ../go-server
+            docker build -t ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-back:${{ env.IMAGE_TAG }} -f Dockerfile .
+            docker tag ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-back:${{ env.IMAGE_TAG }} ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-back:${LATEST_TAG}
+            docker push ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-back:${{ env.IMAGE_TAG }}
+            docker push ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}-back:${LATEST_TAG}
+            
+            docker images
+        
         continue-on-error: false
 
       - name: Print image URI
